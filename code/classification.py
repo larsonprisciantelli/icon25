@@ -17,6 +17,20 @@ from sklearn.metrics import precision_score, recall_score, accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_validate
 
+from rich.table import Table
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.text import Text
+
+
+def console_ask(title: str, is_ask: bool = False):
+    if is_ask:
+        ret = Prompt.ask(f"[bold blue]{title} [/bold blue]")
+        return ret
+    else:
+        console = Console()
+        label = Text(title, style="bold green")
+        console.print(label)
 
 #funzione di conversione  dei dati per la classificazione da categorici a numerici
 def prepDataset(df):
@@ -213,21 +227,21 @@ def searchClassificator(xtr,ytr,xts,yts):
     target_names = ['anime','cult','fantasy','action','documentary','nature','romantic','sport','thrillers','kids','dramas','horror','standup','commedies','musical']
 
     #testing grid
-    print("# Tuning degli iperparametri\n")
+    console_ask("# Tuning degli iperparametri\n")
     #ricerca iperparametri più performanti tramite cross validation
     grid_search = GridSearchCV(estimator=knn, param_grid=grid, n_jobs=-1, cv=cv, scoring=score ,error_score=0)
     grid_result = grid_search.fit(xtr, ytr)
 
-    print("Miglior combinazione di parametri ritrovata:\n")
-    print(grid_search.best_params_)
-    print()
-    print("Classification report:\n")
-    print("Il modello è stato addestrato sul training set completo\n")
-    print(" Le metriche sono state calcolate sul test set.\n")
+    console_ask("Miglior combinazione di parametri ritrovata:\n")
+    console_ask(grid_search.best_params_)
+    console_ask()
+    console_ask("Classification report:\n")
+    console_ask("Il modello è stato addestrato sul training set completo\n")
+    console_ask(" Le metriche sono state calcolate sul test set.\n")
     y_true, y_pred = yts, grid_search.predict(xts)
     
-    print(classification_report(y_true, y_pred,target_names=target_names))
-    print()
+    console_ask(classification_report(y_true, y_pred,target_names=target_names))
+    console_ask()
 
 
     #grid searching key hyperparametres per RandomForestClassifier
@@ -245,21 +259,21 @@ def searchClassificator(xtr,ytr,xts,yts):
 
 
     #testing grid
-    print("# Tuning degli iperparametri\n")
+    console_ask("# Tuning degli iperparametri\n")
     #ricerca iperparametri più performanti tramite cross validation
     grid_search = GridSearchCV(estimator=randomForest, param_grid=grid, n_jobs=-1, cv=cv, scoring=score ,error_score=0)
     grid_result = grid_search.fit(xtr, ytr)
 
-    print("Miglior combinazione di parametri ritrovata:\n")
-    print(grid_search.best_params_)
-    print()
-    print("Classification report:\n")
-    print("Il modello è stato addestrato sul training set completo\n")
-    print(" Le metriche sono state calcolate sul test set.\n")
+    console_ask("Miglior combinazione di parametri ritrovata:\n")
+    console_ask(grid_search.best_params_)
+    console_ask()
+    console_ask("Classification report:\n")
+    console_ask("Il modello è stato addestrato sul training set completo\n")
+    console_ask(" Le metriche sono state calcolate sul test set.\n")
     y_true, y_pred = yts, grid_search.predict(xts)
     
-    print(classification_report(y_true, y_pred,target_names=target_names))
-    print()
+    console_ask(classification_report(y_true, y_pred,target_names=target_names))
+    console_ask()
 
 
     #grid searching key hyperparameters per BaggingClassifier
@@ -275,21 +289,21 @@ def searchClassificator(xtr,ytr,xts,yts):
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2)
 
     #testing grid
-    print("# Tuning degli iperparametri\n")
+    console_ask("# Tuning degli iperparametri\n")
     #print()
     grid_search = GridSearchCV(estimator=bagging, param_grid=grid, n_jobs=-1, cv=cv, scoring=score, error_score=0)
     grid_result = grid_search.fit(xtr, ytr)
 
-    print("Miglior combinazione di parametri ritrovata:\n")
-    print(grid_search.best_params_)
-    print()
-    print("Classification report:\n")
-    print("Il modello è stato addestrato sul training set completo.\n")
-    print("Le metriche sono state calcolate sul test set.\n")
+    console_ask("Miglior combinazione di parametri ritrovata:\n")
+    console_ask(grid_search.best_params_)
+    console_ask()
+    console_ask("Classification report:\n")
+    console_ask("Il modello è stato addestrato sul training set completo.\n")
+    console_ask("Le metriche sono state calcolate sul test set.\n")
     y_true, y_pred = yts, grid_search.predict(xts)
     
-    print(classification_report(y_true, y_pred,target_names=target_names))
-    print()
+    console_ask(classification_report(y_true, y_pred,target_names=target_names))
+    console_ask()
 
 
 
@@ -372,7 +386,7 @@ def main(userMovie):
     
     #predizione del genere del file dato dall'utente
     result= predictionGenre(r"code\finalized_rf.sav",userMovie,prepInfo)
-    print('Il genere del film o serie TV da te inserito è %s \n' % result)
+    console_ask('Il genere del film o serie TV da te inserito è %s \n' % result)
 
 
 if __name__ == "__main__":

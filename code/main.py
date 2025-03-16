@@ -3,25 +3,50 @@ import recommender as rec
 import classification as clf
 import KB
 
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
 
 #funzione per l'inserimento dei dati del film dall'utente
 def getUserMovie(choice):
-    title = input("Inserire il nome del film o serie TV che hai apprezzato: ").lower()
-    typeM = input(title + ' è un film? (s/n) \n -> ').lower()
+    console = Console()
+    title = Prompt.ask("[bold blue]Inserire il nome del film o serie TV che hai apprezzato: [/bold blue]").lower()
+    typeM = Prompt.ask(f"[bold blue]{title} è un film? (s/n) [/bold blue]").lower()
     while (str(typeM) != 's' and str(typeM) != 'n'):
-        typeM = input("Inserisci un'opzione valida --> ")
+        typeM = Prompt.ask("[bold blue]Inserisci un'opzione valida [/bold blue]").lower()
     if typeM == 's':
         typeM = 'Movie'
     else:
         typeM = 'TV Show'
-    country = input('Inserire il paese di produzione: \n -> ').lower()
-    yr = input ('Inserire l`anno di rilascio: \n -> ').lower()
-    yr=releaseYear(yr)
-    cast = input('Inserire un membro del cast: \n -> ').lower()
-    rating = input('Inserire un voto da 1 a 10 sul film/serie TV: \n -> ').lower()
+    country = Prompt.ask('[bold blue]Inserire il paese di produzione: [/bold blue] -> ').lower()
+    yr = Prompt.ask('[bold blue]Inserire l`anno di rilascio: [/bold blue] -> ').lower()
+    yr = releaseYear(yr)
+    cast = Prompt.ask('[bold blue]Inserire un membro del cast: [/bold blue] -> ').lower()
+    rating = Prompt.ask('[bold blue]Inserire un voto da 1 a 10 sul film/serie TV: [/bold blue] -> ').lower()
+    print('\n\n')
     genreM=''
     if choice == 1:
-        genreM = input('Inserisci il genere, scegliendo tra questi:\n1 action \n2 anime \n3 commedies \n4 cult \n5 documentary \n6 dramas \n7 fantasy \n8 horror \n9 kids \n10 musical \n11 nature \n12 romantic \n13 sport \n14 stand-up \n15 thrillers\n ->').lower()
+        table = Table(title="Scegli un Genere:")
+        table.add_column("Generi", style="cyan", justify="left")
+        table.add_row("1. Action")
+        table.add_row("2. Anime")
+        table.add_row("3. Commedies")
+        table.add_row("4. Cult")
+        table.add_row("5. Documentary")
+        table.add_row("6. Dramas")
+        table.add_row("7. Fantasy")
+        table.add_row("8. Horror")
+        table.add_row("9. Kids")
+        table.add_row("10. Musical")
+        table.add_row("11. Nature")
+        table.add_row("12. Romantic")
+        table.add_row("13. Sport")
+        table.add_row("14. Stand-up")
+        table.add_row("15. Thrillers")
+        console.print(table)
+        genreM = Prompt.ask('[bold blue]Inserisci il genere: [/bold blue]').lower()
         if (genreM == '1'):
             genreM = 'action'
         elif (genreM == '2'):
@@ -54,7 +79,7 @@ def getUserMovie(choice):
             genreM = 'thrillers' 
         else:
             while (not 1 <= int(genreM) <= 15):
-                genreM = input("Perfavore, inserisci un numero corretto.\n") 
+                genreM = Prompt.ask("[bold blue]Perfavore, inserisci un numero corretto.[/bold blue]") 
     data = {'type':[typeM],'title':[title],'cast':[cast],'genre': [genreM],'country':[country],'year_range':[yr],'ratings':[rating]}
     userMovieDF = pd.DataFrame(data)
     return userMovieDF
@@ -62,10 +87,22 @@ def getUserMovie(choice):
 
 #funzione del menu principale
 def menu():
-    print("Benvenuto in UnibaVision!")
-    choice = input("Scegli come proseguire: \n 1. Lasciati suggerire un nuovo film sulla base di un altro che hai apprezzato \n 2. Scopri il genere di un film o serie TV \n 3. Interroga il sistema \n 4. Esci\n --> ")
+
+    console = Console()
+    panel = Panel("Benvenuto in CinemaAI", title="CinemaAI")
+    console.print(panel)
+
+    table = Table(title="Scegli cosa fare:")
+    table.add_column("Operazioni Disponibili", style="cyan", justify="left")
+    table.add_row("1. Lasciati suggerire un nuovo film sulla base di un altro che hai apprezzato")
+    table.add_row("2. Scopri il genere di un film o serie TV")
+    table.add_row("3. Interroga il sistema")
+    table.add_row("4. Esci")
+    console.print(table)
+
+    choice = Prompt.ask("[bold blue]Inserisci l'operazione: [/bold blue]")
     while (int(choice) != 1 and int(choice) != 2 and int(choice) != 3 and int(choice) != 4):
-        choice = input("Inserisci un'opzione valida --> ")
+        choice = Prompt.ask("[bold blue]Inserisci un'opzione valida [/bold blue]")
     return int(choice)
 
 
@@ -105,18 +142,19 @@ def main():
         #menu
         choice = menu()
         
+        console = Console()
+        label = Text("\n\nINIZIAMO!\n", style="bold green")
+        console.print(label)
+
         if choice == 1:
-            print('INIZIAMO! \n')
             userMovie = getUserMovie(choice)
             #recommender system
             rec.main(userMovie)
         if choice == 2:
-            print('INIZIAMO! \n')
             userMovie = getUserMovie(choice)
             #predizione genere
             clf.main(userMovie)
         if choice == 3:
-            print('INIZIAMO! \n')
             #interrogazione della base di conoscenza sul film
             KB.mainFunz()
         if choice == 4:

@@ -7,8 +7,24 @@ import KB
 import sys 
 import os
 
+from rich.table import Table
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.text import Text
+
 '''calcolo delle similarità tra i valori del film inserito dall utente e quelli presenti nel
 cluster, restituendo il valore totale di similarità dell'intero cluster'''
+
+
+def console_ask(title: str, is_ask: bool = False):
+    if is_ask:
+        ret = Prompt.ask(f"[bold blue]{title} [/bold blue]")
+        return ret
+    else:
+        console = Console()
+        label = Text(title, style="bold green")
+        console.print(label)
+
 
 def similarities(cluster, userMovie):
     totalSum = 0
@@ -57,9 +73,13 @@ def clusterOperations(df,n):
 
 '''Stampa dei film da suggerire all utente.'''
 def toUser(topTen):
-    print('Ti consigliamo di guardare:\n')
+    print("\n\n")
+    table = Table(title="Ti consigliamo di guardare:")
+    table.add_column("Da Guardare", style="cyan", justify="left")
     for element in topTen:
-        print(element)
+        table.add_row(element)
+    console = Console()
+    console.print(table)
 
 '''Definizione dei film da suggerire all utente, mediante calcoli relativi
     le similarità con i cluster.'''
@@ -80,7 +100,7 @@ def recommendation(cluster1,cluster2,cluster3,userMovie):
         topTen = cluster3['title'].head(10)
     toUser(topTen)
 
-    rispostaUtente=input('Per dettagli sulle raccomandazioni restituite, digitare kb: \n')
+    rispostaUtente=console_ask('Per dettagli sulle raccomandazioni restituite, digitare kb: ', True)
     if(rispostaUtente=='kb'):
         KB.explainResultsCluster(cluster1, cluster2, cluster3, simil, choice)
     else:

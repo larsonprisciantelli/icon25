@@ -1,5 +1,9 @@
 import pandas as pd
 import numpy as np
+
+from rich.prompt import Prompt
+from rich.console import Console
+from rich.text import Text
 # Inizio KB
 # Lettura csv
 movieDataString = pd.read_csv(r'datasets/Netflix_preprocessato.csv', sep=',')
@@ -11,6 +15,16 @@ genre = movieDataString.loc[:, 'genre']
 country = movieDataString.loc[:, 'country']
 ratings = movieDataString.loc[:, 'ratings']
 year_range= movieDataString.loc[:, 'year_range']
+
+
+def console_ask(title: str, is_ask: bool = False):
+    if is_ask:
+        ret = Prompt.ask(f"[bold blue]{title} [/bold blue]")
+        return ret
+    else:
+        console = Console()
+        label = Text(title, style="bold green")
+        console.print(label)
 
 # dato un genere, restituisce una lista con tutti i film che trova di quel genere
 def trovaGenere(genere:str):    
@@ -26,14 +40,14 @@ def trovaGenere(genere:str):
 # determina se un film esiste
 def titoloEsiste(titolo:str):
     for i in range(len(title)):
-        if(title[i] == titolo or title[i].lower() == titolo):
+        if(title[i] == titolo or title[i].lower() == titolo.lower()):
             return True
     return False
 
 # determina in che posizione si trova il film
 def whereTitoloEsiste(titolo:str):
     for i in range(len(title)):
-        if(title[i] == titolo or title[i].lower() == titolo):
+        if(title[i] == titolo or title[i].lower() == titolo.lower()):
             return i
     return i # altrimenti ritonra un mess di errore
 
@@ -66,12 +80,12 @@ def corrispondenzaEsiste(titolo:str, genere:str):
 def askGenereDaTitolo(titolo:str,genere:str):
     # Controllo se titolo scritto bene
     if(not titoloEsiste(titolo)):
-        print("Il titolo inserito non esiste") 
+        console_ask("Il titolo inserito non esiste") 
         return
 
     #controllo se genere scritto bene
     if(not genereEsiste(genere)):
-        print("Hai inserito un genere non presente") 
+        console_ask("Hai inserito un genere non presente") 
         return
     
     stringa = titolo + "_" + genere
@@ -79,30 +93,30 @@ def askGenereDaTitolo(titolo:str,genere:str):
     # Trova la corrispondenza tra titolo e genere
     risposta = corrispondenzaEsiste(titolo,genere) 
     if(risposta):
-        print("YES")
+        console_ask("YES")
     else:
-        print("NO")
+        console_ask("NO")
     
     # spiega come si è arrivati alla soluzione
-    rispostaUtente=input("Digitare how per la spiegazione: ")
+    rispostaUtente=console_ask("Digitare how per la spiegazione: ", True)
     if (rispostaUtente.lower()=="how"):
-       print("askGenereDaTitolo("+titolo+","+genere+") <=> "+stringa)
-       rispostaUtente=input("Digitare 'how i' specificando al posto di i il numero dell'atomo : ")
+       console_ask("askGenereDaTitolo("+titolo+","+genere+") <=> "+stringa)
+       rispostaUtente=console_ask("Digitare 'how i' specificando al posto di i il numero dell'atomo : ", True)
        if(rispostaUtente.lower()=='how 1'):
-           print(stringa + " <=>", risposta)
+           console_ask(f"{stringa} <=> {risposta}")
        else:
-           print("Errore di digitazione esiste solo un atomo ")
+           console_ask("Errore di digitazione esiste solo un atomo ")
     else:
-         print("Errore di digitazione")
+         console_ask("Errore di digitazione")
     
 # dati due titoli, risponde se presentano lo stesso genere 
 def askStessoGenere(titolo1:str, titolo2:str):
     
     if(not titoloEsiste(titolo1)):
-        print("Il primo titolo inserito non è presente")
+        console_ask("Il primo titolo inserito non è presente")
         return
     if(not titoloEsiste(titolo2)):
-        print("Il secondo titolo inserito non è presente")
+        console_ask("Il secondo titolo inserito non è presente")
         return
     
     # Identifico la posizione dei titoli visto che sono presenti nel dataset
@@ -120,100 +134,100 @@ def askStessoGenere(titolo1:str, titolo2:str):
     risposte[3] = generiUguali(primoGenere, secondoGenere)
 
     if(risposte.get(1) == True and risposte.get(2) == True and risposte.get(3) == True):
-        print("YES")
+        console_ask("YES")
     else:
-        print("NO")
+        console_ask("NO")
     
     # Spiega come si è arrivati ai risultati
-    rispostaUtente=input("Digitare how per la spiegazione: ")
+    rispostaUtente=console_ask("Digitare how per la spiegazione: ", True)
     if (rispostaUtente.lower()=="how"):
-       print("askStessoGenere("+titolo1+","+titolo2+") <=> "+titolo1+"_"+primoGenere+ " and "+titolo2+"_"+secondoGenere+" and generiUguali("+primoGenere+","+secondoGenere+")")
+       console_ask("askStessoGenere("+titolo1+","+titolo2+") <=> "+titolo1+"_"+primoGenere+ " and "+titolo2+"_"+secondoGenere+" and generiUguali("+primoGenere+","+secondoGenere+")")
 
-       rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+       rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
        if(rispostaUtente.lower()=='how 1'):
-           print(titolo1+"_"+primoGenere+" <=>", risposte.get(1))
-           rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+           console_ask(titolo1+"_"+primoGenere+" <=>", risposte.get(1))
+           rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
            if(rispostaUtente.lower() =="how 2"):
-               print(titolo2+"_"+secondoGenere+" <=>",risposte.get(2))       
-               rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+               console_ask(titolo2+"_"+secondoGenere+" <=>",risposte.get(2))       
+               rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
                if(rispostaUtente=="how 3"): 
-                   print("generiUguali("+primoGenere+","+secondoGenere+") <=>", risposte[3])       
+                   console_ask("generiUguali("+primoGenere+","+secondoGenere+") <=>", risposte[3])       
                else:
-                   print("Errore di digitazione")
+                   console_ask("Errore di digitazione")
            else: 
-               print("Errore di digitazione")
+               console_ask("Errore di digitazione")
        else:
            if(rispostaUtente.lower() =="how 2"):
-               print("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") <=>", risposte.get(2))       
-               rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+               console_ask("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") <=>", risposte.get(2))       
+               rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
                
                if(rispostaUtente.lower()=="how 1"):
-                   print("PrimaCorrispondenza("+titolo1+") <=> corrispondenzaEsiste("+titolo1+" , " + primoGenere+ ") <=>", risposte.get(1))
+                   console_ask("PrimaCorrispondenza("+titolo1+") <=> corrispondenzaEsiste("+titolo1+" , " + primoGenere+ ") <=>", risposte.get(1))
                else:
                    if(rispostaUtente=="how 3"): 
-                       print("stessoGenere("+titolo1+","+titolo2+") <=> "+primoGenere+"_"+secondoGenere+" <=>", risposte[3])       
+                       console_ask("stessoGenere("+titolo1+","+titolo2+") <=> "+primoGenere+"_"+secondoGenere+" <=>", risposte[3])       
                    else:
-                       print("Errore di digitazione")
+                       console_ask("Errore di digitazione")
                 
            else:
                if(rispostaUtente.lower() =="how 3"):
-                   print("stessoGenere("+titolo1+","+titolo2+") <=>  generiUguali("+primoGenere+","+secondoGenere+") <=>", risposte[3])
-                   rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+                   console_ask("stessoGenere("+titolo1+","+titolo2+") <=>  generiUguali("+primoGenere+","+secondoGenere+") <=>", risposte[3])
+                   rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
                    if(rispostaUtente.lower() =="how 2"):
-                       print("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") <=>", risposte.get(2))       
-                       rispostaUtente=input("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ")
+                       console_ask("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") <=>", risposte.get(2))       
+                       rispostaUtente=console_ask("Digitare 'how i' specificando in i il numero dell'atomo per ulteriori informazioni: ", True)
                         
                        if(rispostaUtente.lower()=="how 1"):
-                           print("PrimaCorrispondenza("+titolo1+" ) <=> corrispondenzaEsiste("+titolo1+" , " + primoGenere+ ") is ", risposte.get(1))
+                           console_ask("PrimaCorrispondenza("+titolo1+" ) <=> corrispondenzaEsiste("+titolo1+" , " + primoGenere+ ") is ", risposte.get(1))
                        else:
                            if(rispostaUtente=="how 2"): 
-                               print("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") is ", risposte.get(2))       
+                               console_ask("SecondaCorrispondenza("+titolo2+") <=> corrispondenzaEsiste("+titolo2+" , " + secondoGenere+ ") is ", risposte.get(2))       
                            else:
-                               print("Errore di digitazione")
+                               console_ask("Errore di digitazione")
                else:
-                   print("Errore di digitazione")
+                   console_ask("Errore di digitazione")
     else:
-        print("Errore di digitazione") 
+        console_ask("Errore di digitazione") 
         
 
 # spiega i risultati ottenuti dalle raccomandazioni effettuate col clustering
 
 def explainResultsCluster(cluster1, cluster2, cluster3, similarities, choice):
     choice+=1
-    print('Il cluster di appartenenza è il valore di choice:', choice)
-    print('Le metriche restituite tra tutti i cluster sono le seguenti:', similarities )
+    console_ask(f'Il cluster di appartenenza è il valore di choice: {choice}')
+    console_ask(f'Le metriche restituite tra tutti i cluster sono le seguenti: {similarities}')
     if(choice == 1):
         copia = cluster1.drop(columns=['ratings_range','type','genre','cast','year_range','country'])
         copia = copia.rename(columns={"sum": "similarity"})
-        print('\nLe singole metriche di similarità restituite per il cluster', choice, 'sono:\n', copia.head(10), '\n')
+        console_ask(f'\nLe singole metriche di similarità restituite per il cluster {choice} sono:\n {copia.head(10)} \n')
     if(choice == 2):
         copia = cluster2.drop(columns=['ratings_range','genre','cast','year_range','country'])
         copia = copia.rename(columns={"sum": "similarity"})
-        print('\nLe singole metriche di similarità restituite per il cluster', choice, 'sono:\n', copia.head(10), '\n')
+        console_ask(f'\nLe singole metriche di similarità restituite per il cluster {choice} sono:\n {copia.head(10)} \n')
     if(choice == 3):
         copia = cluster3.drop(columns=['ratings_range','genre','cast','year_range','country'])
         copia = copia.rename(columns={"sum": "similarity"})
-        print('\nLe singole metriche di similarità restituite per il cluster', choice ,'sono: \n', copia.head(10), '\n')
+        console_ask(f'\nLe singole metriche di similarità restituite per il cluster {choice} sono:\n {copia.head(10)} \n')
 
 def mainFunz():
     # askGenereDaTitolo
-    print('1) Dato un titolo e un genere in input, la KB è in grado di dirti se il titolo corrisponde al genere indicato grazie alla funzione askGenereDaTitolo, rispondendo YES se effettivamente corrisponde, altrimenti NO \n')
+    console_ask('1) Dato un titolo e un genere in input, la KB è in grado di dirti se il titolo corrisponde al genere indicato grazie alla funzione askGenereDaTitolo, rispondendo YES se effettivamente corrisponde, altrimenti NO \n')
     
     # askStessoGenere
-    print('2) Dati due titoli in input, la KB è in grado di dirti se il genere dei due film è lo stesso oppure no grazie alla funzione askStessoGenere, rispondendo YES se corrispondono, NO altrimenti\n')
+    console_ask('2) Dati due titoli in input, la KB è in grado di dirti se il genere dei due film è lo stesso oppure no grazie alla funzione askStessoGenere, rispondendo YES se corrispondono, NO altrimenti\n')
     
-    rispostaUtente=input("Digitare il numero della funzione che si vuole eseguire : ")
+    rispostaUtente=console_ask("Digitare il numero della funzione che si vuole eseguire : ", True)
     if (rispostaUtente=="1"):
-        titoloUtente = input("Digitare il titolo del film: ")
-        genereUtente = input("Digitare il genere del film: ")
+        titoloUtente = console_ask("Digitare il titolo del film: ", True)
+        genereUtente = console_ask("Digitare il genere del film: ", True)
         askGenereDaTitolo(titoloUtente, genereUtente)   
     else:
         if(rispostaUtente=="2"):
-            titoloUtente1 = input("Digitare il titolo del primo film: ")
-            titoloUtente2 = input("Digitare il titolo del secondo film: ")
+            titoloUtente1 = console_ask("Digitare il titolo del primo film: ", True)
+            titoloUtente2 = console_ask("Digitare il titolo del secondo film: ", True)
             askStessoGenere(titoloUtente1,titoloUtente2) 
         else: 
-            print('Errore di digitazione')
+            console_ask('Errore di digitazione')
 
 if __name__ == "__main__":
     mainFunz()
